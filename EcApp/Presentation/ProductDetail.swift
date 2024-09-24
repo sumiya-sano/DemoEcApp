@@ -14,35 +14,34 @@ struct ProductDetail: View {
     
     var body: some View {
         VStack {
-            Text(productName)
+            Text("商品名 " + productName)
+                .font(.largeTitle)
+                .padding()
             AsyncImage(url: imageUrl) { phase in
                 switch phase {
                 case .success(let image):
                     image
                         .resizable()
-                        .frame(width: 150,height: 215)
+                        .aspectRatio(contentMode: .fit)
                 case .failure(_):
                     Image(systemName: "exclamationmark.triangle.fill")
                         .resizable()
                         .foregroundColor(.yellow)
-                        .frame(width: 150,height: 215)
                 case .empty:
                     ProgressView()
-                        .frame(width: 150,height: 215)
                 @unknown default:
                     Image(systemName: "exclamationmark.triangle.fill")
                         .resizable()
                         .foregroundColor(.red)
-                        .frame(width: 150,height: 215)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(10)
-            Text(productPrice)
+            .frame(width: 150, height: 215)
+            .padding()
+            Text("価格 " + productPrice)
+                .font(.title)
+                .padding()
         }
+        .navigationTitle("商品詳細")
+        .navigationBarTitleDisplayMode(.inline)
     }
-}
-
-#Preview {
-    ProductDetail(imageUrl:  URL(string: "https://user0514.cdnw.net/shared/img/thumb/tdog17030723_TP_V.jpg")!, productName: "わんこ", productPrice: "50000円")
 }

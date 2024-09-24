@@ -8,24 +8,23 @@
 import SwiftUI
 
 struct SearchResult: View {
-    @StateObject private var viewModel = SRViewModel()
+    @State private var products: [Product] = []
     
     var body: some View {
         NavigationStack {
-            VStack {
-                TextField("検索...", text: .constant("")) // 検索バーを作成
-                    .textFieldStyle(.roundedBorder)
-                    .padding()
-                    .onSubmit {
-                        // 検索クエリを使って検索を実行
-                        viewModel.searchProducts(query: "猫") // 仮の検索クエリ
-                    }
-                
-                List(viewModel.products) { product in
-                    ProductView(product: product)
-                }
+            List(products) { product in
+                ProductView(product: product)
             }
-            .navigationTitle("商品検索")
+            .onAppear {
+                loadProducts() // 商品をロード
+            }
+        }
+    }
+    
+    // 商品データの読み込み（モックデータ）
+    private func loadProducts() {
+        SearchApi.searchProducts(query: "") { loadedProducts in
+            self.products = loadedProducts
         }
     }
 }
@@ -34,37 +33,46 @@ struct ProductView: View {
     let product: Product
     
     var body: some View {
-        HStack(alignment: .top) {
-            AsyncImage(url: product.productImage) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .frame(width: 150, height: 215)
-                case .failure(_):
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .resizable()
-                        .foregroundColor(.yellow)
-                        .frame(width: 150, height: 215)
-                case .empty:
-                    ProgressView()
-                        .frame(width: 150, height: 215)
-                @unknown default:
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .resizable()
-                        .foregroundColor(.red)
-                        .frame(width: 150, height: 215)
+        NavigationLink(destination: ProductDetail(imageUrl: product.productImage, productName: product.productName, productPrice: product.productPrice.price)) {
+            HStack(alignment: .top) {
+                AsyncImage(url: product.productImage) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .frame(width: 150, height: 215)
+                    case .failure(_):
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .resizable()
+                            .foregroundColor(.yellow)
+                            .frame(width: 150, height: 215)
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 150, height: 215)
+                    @unknown default:
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .resizable()
+                            .foregroundColor(.red)
+                            .frame(width: 150, height: 215)
+                    }
                 }
-            }
-            .padding(10)
-            
-            VStack(alignment: .leading) {
-                Text(product.productName)
-                    .font(.title)
-                    .foregroundColor(.black)
-                Text(product.productPrice.price)
-                    .font(.title3)
-                    .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                
+                VStack(alignment: .leading) {
+                    Text(product.productName)
+                        .font(.title)
+                        .foregroundColor(.black)
+                        .padding(.bottom, 10)
+                        .padding(.top, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(product.productPrice.price)
+                        .font(.title3)
+                        .foregroundColor(.black)
+                        .padding(.bottom, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
     }
